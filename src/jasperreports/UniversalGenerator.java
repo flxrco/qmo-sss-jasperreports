@@ -5,20 +5,17 @@
  */
 package jasperreports;
 
+import jasperreports.models.JdbcHelper;
+import jasperreports.models.ParamLengthMismatchException;
+import jasperreports.models.ReportGenerator;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Scanner;
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
 
 /**
  *
@@ -30,110 +27,131 @@ public class UniversalGenerator {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
+        args = new String[1];
+        args[0] = "C:\\Users\\User\\Desktop\\test.txt";
+        System.out.println("***QMO-SSS Report Generation Automator***");
+        try (Scanner sc = new Scanner(System.in)) {
+            while (true) {
+                String url, user, pass;
+                System.out.print("Database URL> ");
+                url = sc.next();
+                System.out.print("Username> ");
+                user = sc.next();
+                System.out.print("Password> ");
+                pass = sc.next();
 
-        try {
-            String[] arr = new String[5];
-
-            System.out.print("DB URL> ");
-            arr[0] = sc.nextLine();
-            System.out.print("USERNAME> ");
-            arr[1] = sc.nextLine();
-            System.out.print("PASSWORD> ");
-            arr[2] = sc.nextLine();
-
-            JdbcHelper.config("oracle.jdbc.driver.OracleDriver", arr[0], arr[1], arr[2]);
-
-            System.out.print(".JRXML FILE> ");
-            arr[3] = sc.nextLine();
-            System.out.print(".TXT FILE> ");
-            arr[4] = sc.nextLine();
-
-            generateReports(arr[3], arr[4]);
-        } catch (ClassNotFoundException ex) {
-            System.out.println("CLASS NOT FOUND!");
-        }
-
-    }
-
-    public static void generateReports(String src, String paramSrc) {
-        try (Connection con = JdbcHelper.getCon()) { //establish connection to oracle db
-            JasperReport jasperReport = JasperCompileManager.compileReport(src); //compile the .jrxml to be used
-            try (BufferedReader br = new BufferedReader(new FileReader(paramSrc))) {
-                String str; //cache for the lines that the bufferedreader is reading
-                int counter = 0;
-                List<String> paramNames = new ArrayList<>(); //paramnames that the .jrxml file uses
-                while ((str = br.readLine()) != null) {
-                    String[] split = str.split(","); //format: param1,param2,param3,dest
-
-                    if (counter == 0) { //if true, this means that the BR is reading the first line of the .txt file
-                        for (String s : split) { //that also means that it SHOULD contain the param names
-                            s = s.trim();
-                            paramNames.add(s);
-                        }
+                try {
+                    System.out.println("Testing JDBC connection...");
+                    //JdbcHelper.config("oracle.jdbc.driver.OracleDriver", url, user, pass);
+                    JdbcHelper.config("oracle.jdbc.driver.OracleDriver", "jdbc:oracle:thin:@172.20.0.201:1521:USTPRD1", "opqm_user03", "password");
+                    if (JdbcHelper.testConnection()) {
+                        System.out.println("Connection successful.");
+                        break;
                     } else {
-                        String dest = "report" + counter;
-
-                        /*
-                        GRAMMAR:
-                        <txtline> -> <params>","<txtline><newline>
-                        <params> -> <param> | <param>","<params>
-                         */
-                        Map<String, Object> params = new HashMap<>();
-
-                        int i = 0;
-                        for (String s : split) {
-                            s = s.trim();
-                            if (i + 1 > paramNames.size()) {
-                                dest = s;
+                        System.out.println("Connection failed. Would you like to attempt login again? [Y/N]");
+                        switch (sc.next().charAt(0)) {
+                            case 'Y':
+                            case 'y':
                                 break;
-                            } else {
-                                params.put(paramNames.get(i), s);
-                            }
+                            default:
+                                System.out.println("Terminating the program.");
+                                return;
                         }
-
-                        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, con);
-                        JasperExportManager.exportReportToPdfFile(jasperPrint, dest);
                     }
-                    counter++;
+                } catch (ClassNotFoundException ex) {
+                    //this will NEVER happen
                 }
             }
-        } catch (Exception oex) {
-            System.out.println("Exception encountered: ");
-            System.out.println(oex.toString());
         }
-    }
-    
-    //codes below are unused
-    
-    private String generatePdfReport(Connection connection, JasperReport jasperReport, String params, List<String> paramNames) throws JRException {
-        /*
-        CFG:
-        <txtline> -> <params>","<txtline><newline>
-        <params> -> <param> | <param>","<params>
+        
+        System.out.println("Commencing report generation.");
+        
+        /**
+         * EXPECTED FORMAT: LINE 1: .jrxml file path LINE 2: param1, param2,
+         * param3, param4 LINE ~: arg1, arg2, arg3, arg4 [,filename]
          */
-        
-        String dest = "report" + params.hashCode();
-        
-        Map<String, Object> paramMap = new HashMap<>();
-        
-        int i = 0;
-        for (String s : params.split(",")) {
-            s = s.trim();
-            if (i + 1 > paramNames.size()) {
-                dest = s;
-                break;
-            } else {
-                paramMap.put(paramNames.get(i), s);
+        for (int i = 1; i <= args.length; i++) {
+            String path = args[i - 1];
+            System.out.printf("[%d/%d] Preparing the report on path %s\n", i, args.length, path);
+            try (BufferedReader br = new BufferedReader(new FileReader(new File(path)))) {
+                String str, reportPath = null;
+                String[] params;
+                ReportGenerator report = null;
+                int c = 1;
+                while ((str = br.readLine()) != null) {
+                    try {
+                        String[] repArgs = null;
+                        switch (c) {
+                            case 1: {
+                                reportPath = str;
+                                break;
+                            }
+                            case 2: {
+                                params = splitAndTrim(str);
+                                report = new ReportGenerator(JdbcHelper.getConnection(), reportPath, params);
+                                break;
+                            }
+                            default: {
+                                repArgs = splitAndTrim(str);
+                                if (repArgs.length == report.getParamCount()) {
+                                    report.insertArguments(repArgs, null);
+                                } else if (repArgs.length == report.getParamCount() + 1) {
+                                    report.insertArguments(Arrays.copyOfRange(repArgs, 0, repArgs.length - 1), repArgs[repArgs.length - 1]);
+                                }
+                                break;
+                            }
+                        }
+                    } catch (ParamLengthMismatchException ex2) {
+                        System.out.printf("There was a mismatch between the parameters and the arguments on line %d \n", c);
+                    } catch (SQLException ex) {
+                        //will never happen
+                    } catch (JRException ex) {
+                        System.out.printf("An error with the .jrxml file was encountered: %s", ex.getMessage());
+                        System.out.println(i < args.length ? "The program will proceed to generate the next report." : "");
+                        break;
+                    }
+
+                    c++;
+                }
+                try {
+                    for (int j = 0; j < report.getReportCount(); j++) {
+                        System.out.printf("%s: Generating to %s \r", progressBar(15, j + 1, report.getReportCount()), report.generateReport(j));
+                    }
+                    System.out.printf("%s: Generated\r", progressBar(15, 15, report.getReportCount()));
+                } catch (JRException ex) {
+                    System.out.println(ex.toString());
+                    System.out.printf("\nAn error with the .jrxml file was encountered: %s", ex.getMessage());
+                    System.out.println(i < args.length ? "The program will proceed to generate the next report." : "");
+                    break;
+                }
+
+            } catch (IOException ex) {
+                System.out.printf("The .txt file at path %s was not found.", path);
+                System.out.println(i < args.length ? "The program will proceed to generate the next report." : "");
             }
         }
-        
-        return generatePdfReport(connection, jasperReport, paramMap, dest);
+        System.out.println("***Generation complete***");
     }
 
-    private String generatePdfReport(Connection connection, JasperReport jasperReport, Map<String, Object> parameters, String destinationFile) throws JRException {
-        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, connection);
-        JasperExportManager.exportReportToPdfFile(jasperPrint, destinationFile);
-        return destinationFile;
+    private static String[] splitAndTrim(String s) {
+        String[] arr = s.split(",");
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = arr[i].trim();
+        }
+        return arr;
+    }
+
+    private static String progressBar(int maxBars, int current, int count) {
+        int barCount = (int) Math.floor(((double) current / count) * maxBars);
+        StringBuilder str = new StringBuilder("|");
+        for (int i = 1; i <= maxBars; i++) {
+            if (barCount >= i) {
+                str.append("=");
+            } else {
+                str.append(" ");
+            }
+        }
+        str.append("| ");
+        return str.toString();
     }
 }
