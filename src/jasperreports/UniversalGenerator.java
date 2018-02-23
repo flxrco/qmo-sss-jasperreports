@@ -96,6 +96,7 @@ public class UniversalGenerator {
             System.out.printf("%s> Starting report generation...\n", path);
             for (int i = 0; i < rep.getReportCount(); i++) {
                 System.out.printf("%s> %s | (%d / %d) Generating report to path %s\r", path, progressBar(50, i + 1, rep.getReportCount()), i + 1, rep.getReportCount(), rep.getDestPath(i));
+                rep.generateReport(i);
             }
             System.out.printf("%s> Report generation completed.\n", path);
 
