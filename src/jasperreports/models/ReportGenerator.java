@@ -23,20 +23,23 @@ import net.sf.jasperreports.engine.JasperReport;
  */
 public class ReportGenerator {
 
-    private Connection connection;
+    private final Connection connection;
 
-    private JasperReport report;
+    private final JasperReport report;
 
-    private String[] params;
-    private List<Map<String, Object>> args;
-    private List<String> destPaths;
-
-    public ReportGenerator(Connection connection, String reportPath, String[] params) throws JRException {
+    private final String[] params;
+    private final List<Map<String, Object>> args;
+    private final List<String> destPaths;
+    private final String subReports;
+    
+    
+    public ReportGenerator(Connection connection, String mainReportPath, String subReportDirPath, String[] params) throws JRException {
         this.connection = connection;
-        report = JasperCompileManager.compileReport(reportPath);
+        report = JasperCompileManager.compileReport(mainReportPath);
         this.params = params;
         args = new ArrayList<>();
         destPaths = new ArrayList<>();
+        subReports = subReportDirPath;
     }
 
     public Map<String, Object> insertArguments(String[] args, String destPath) throws ParamLengthMismatchException {
@@ -48,10 +51,8 @@ public class ReportGenerator {
             for (int i = 0; i < params.length; i++) {
                 argMap.put(params[i], args[i]);
             }
-           
-            //testing
-            argMap.put("SUBREPORT_DIR", "C:/Users/User/Desktop/8_maydagdag/");
-
+            
+            argMap.put("SUBREPORT_DIR", subReports);
             
             this.args.add(argMap);
             destPaths.add(destPath == null ? "jasper-report-" + argMap.hashCode() : destPath);
@@ -69,6 +70,10 @@ public class ReportGenerator {
         for (int i = 0; i < args.size(); i++) {
             generateReport(i);
         }
+    }
+    
+    public String getDestPath(int index) {
+        return destPaths.get(index);
     }
     
     public int getReportCount() {

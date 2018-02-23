@@ -9,12 +9,11 @@ import jasperreports.models.JdbcHelper;
 import jasperreports.models.ParamLengthMismatchException;
 import jasperreports.models.ReportGenerator;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Scanner;
 import net.sf.jasperreports.engine.JRException;
 
 /**
@@ -23,114 +22,108 @@ import net.sf.jasperreports.engine.JRException;
  */
 public class UniversalGenerator {
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        args = new String[1];
-        args[0] = "C:\\Users\\User\\Desktop\\test.txt";
-        System.out.println("***QMO-SSS Report Generation Automator***");
-        try (Scanner sc = new Scanner(System.in)) {
-            while (true) {
-                String url, user, pass;
-                System.out.print("Database URL> ");
-                url = sc.next();
-                System.out.print("Username> ");
-                user = sc.next();
-                System.out.print("Password> ");
-                pass = sc.next();
+    public static void main(String args[]) {
+        try {
+            for (int i = 0; i < args.length; i++) {
+                String path = args[i];
 
-                try {
-                    System.out.println("Testing JDBC connection...");
-                    //JdbcHelper.config("oracle.jdbc.driver.OracleDriver", url, user, pass);
-                    JdbcHelper.config("oracle.jdbc.driver.OracleDriver", "jdbc:oracle:thin:@172.20.0.201:1521:USTPRD1", "opqm_user03", "password");
-                    if (JdbcHelper.testConnection()) {
-                        System.out.println("Connection successful.");
+                switch (i) {
+                    case 1:
+                        registerDatabase(path);
                         break;
-                    } else {
-                        System.out.println("Connection failed. Would you like to attempt login again? [Y/N]");
-                        switch (sc.next().charAt(0)) {
-                            case 'Y':
-                            case 'y':
-                                break;
-                            default:
-                                System.out.println("Terminating the program.");
-                                return;
-                        }
+                    default: {
+
+                        break;
                     }
-                } catch (ClassNotFoundException ex) {
-                    //this will NEVER happen
+
                 }
             }
+        } catch (SQLException ex) {
+            System.out.println("An error was encountered while configuring JDBC: " + ex.getMessage());
+        } catch (IOException ex) {
+            System.out.println("The JDBC config file was not found.");
         }
-        
-        System.out.println("Commencing report generation.");
-        
-        /**
-         * EXPECTED FORMAT: LINE 1: .jrxml file path LINE 2: param1, param2,
-         * param3, param4 LINE ~: arg1, arg2, arg3, arg4 [,filename]
-         */
-        for (int i = 1; i <= args.length; i++) {
-            String path = args[i - 1];
-            System.out.printf("[%d/%d] Preparing the report on path %s\n", i, args.length, path);
-            try (BufferedReader br = new BufferedReader(new FileReader(new File(path)))) {
-                String str, reportPath = null;
-                String[] params;
-                ReportGenerator report = null;
-                int c = 1;
+
+        System.out.println("The program has finished executing.");
+    }
+
+    private static void generateReport(String path) {
+        System.out.printf("%s> Reading contents... \n", path);
+        try (Connection con = JdbcHelper.getConnection()) {
+            ReportGenerator rep = null;
+            try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+                String str = null, mainPath = null, subPath = null;
+                int cnt = 0;
                 while ((str = br.readLine()) != null) {
                     try {
-                        String[] repArgs = null;
-                        switch (c) {
+                        switch (cnt) {
+                            case 0: {
+                                mainPath = str;
+                                break;
+                            }
                             case 1: {
-                                reportPath = str;
+                                subPath = str;
                                 break;
                             }
                             case 2: {
-                                params = splitAndTrim(str);
-                                report = new ReportGenerator(JdbcHelper.getConnection(), reportPath, params);
+                                System.out.printf("%s> Compiling .jrxml at path %s\r", path, mainPath);
+                                rep = new ReportGenerator(con, mainPath, subPath, splitAndTrim(str));
+                                System.out.printf("%s> Successfully compiled .jrxml at path %s\n", path, mainPath);
                                 break;
                             }
                             default: {
-                                repArgs = splitAndTrim(str);
-                                if (repArgs.length == report.getParamCount()) {
-                                    report.insertArguments(repArgs, null);
-                                } else if (repArgs.length == report.getParamCount() + 1) {
-                                    report.insertArguments(Arrays.copyOfRange(repArgs, 0, repArgs.length - 1), repArgs[repArgs.length - 1]);
+                                System.out.printf("%s> Reading parameters on line %d (%s)\r", path, cnt + 1, str);
+                                String[] args = splitAndTrim(str);
+                                if (args.length == rep.getParamCount()) {
+                                    rep.insertArguments(args, null);
+                                } else if (args.length == rep.getParamCount() + 1) {
+                                    rep.insertArguments(Arrays.copyOfRange(args, 0, args.length - 1), args[args.length - 1]);
                                 }
+                                System.out.printf("%s> Successfully registered parameters on line %d.\n", path, cnt + 1);
                                 break;
                             }
+
                         }
-                    } catch (ParamLengthMismatchException ex2) {
-                        System.out.printf("There was a mismatch between the parameters and the arguments on line %d \n", c);
-                    } catch (SQLException ex) {
-                        //will never happen
-                    } catch (JRException ex) {
-                        System.out.printf("An error with the .jrxml file was encountered: %s", ex.getMessage());
-                        System.out.println(i < args.length ? "The program will proceed to generate the next report." : "");
-                        break;
+                    } catch (ParamLengthMismatchException ex) {
+                        System.out.printf("%s> Skipping line %d. A mismatch between args and params was encountered.\n", path, cnt + 1);
                     }
 
-                    c++;
+                    cnt++;
                 }
-                try {
-                    for (int j = 0; j < report.getReportCount(); j++) {
-                        System.out.printf("%s: Generating to %s \r", progressBar(15, j + 1, report.getReportCount()), report.generateReport(j));
-                    }
-                    System.out.printf("%s: Generated\r", progressBar(15, 15, report.getReportCount()));
-                } catch (JRException ex) {
-                    System.out.println(ex.toString());
-                    System.out.printf("\nAn error with the .jrxml file was encountered: %s", ex.getMessage());
-                    System.out.println(i < args.length ? "The program will proceed to generate the next report." : "");
-                    break;
-                }
-
-            } catch (IOException ex) {
-                System.out.printf("The .txt file at path %s was not found.", path);
-                System.out.println(i < args.length ? "The program will proceed to generate the next report." : "");
             }
+
+            System.out.printf("%s> Finished reading the file.\n", path);
+            System.out.printf("%s> Starting report generation...\n", path);
+            for (int i = 0; i < rep.getReportCount(); i++) {
+                System.out.printf("%s> %s | (%d / %d) Generating report to path %s\r", path, progressBar(50, i + 1, rep.getReportCount()), i + 1, rep.getReportCount(), rep.getDestPath(i));
+            }
+            System.out.printf("%s> Report generation completed.\n", path);
+
+        } catch (JRException ex) {
+            System.out.printf("%s> .jrxml compilation has failed. Aborting.\n", path);
+        } catch (IOException ex) {
+            System.out.printf("%s> This file is either missing or invalid. Aborting.\n", path);
+        } catch (SQLException ex) {
+            //will never happen
         }
-        System.out.println("***Generation complete***");
+    }
+
+    private static void registerDatabase(String path) throws IOException, SQLException {
+        String url = null, user = null, pass = null;
+        int cnt = 0;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+            String str = null;
+
+            JdbcHelper.config("oracle.jdbc.driver.OracleDriver", br.readLine(), br.readLine(), br.readLine());
+
+        } catch (ClassNotFoundException ex) {
+            //this will never happen
+        }
+
+        try (Connection con = JdbcHelper.getConnection()) {
+            //just for testing the connectivity
+        }
     }
 
     private static String[] splitAndTrim(String s) {
@@ -151,7 +144,7 @@ public class UniversalGenerator {
                 str.append(" ");
             }
         }
-        str.append("| ");
+        str.append("|");
         return str.toString();
     }
 }

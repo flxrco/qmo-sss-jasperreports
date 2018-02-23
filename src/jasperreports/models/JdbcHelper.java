@@ -24,13 +24,6 @@ public class JdbcHelper {
         prop.put("user", username);
         prop.put("password", password);
         JdbcHelper.url = url;
-        
-        System.out.println("JDBC configuration successful:");
-        System.out.println("DRIVER: " + driverName);
-        System.out.println("URL: " + url);
-        System.out.println("USERNAME: " + username);
-        System.out.println("PASSWORD: " + password.replaceAll(".", "*"));
-        System.out.println("");
     }
     
     public static Connection getConnection() throws SQLException {
