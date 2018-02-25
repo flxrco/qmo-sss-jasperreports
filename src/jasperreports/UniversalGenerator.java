@@ -23,32 +23,36 @@ import net.sf.jasperreports.engine.JRException;
 public class UniversalGenerator {
 
     public static void main(String args[]) {
+        args = new String[2];
+        args[0] = "C:\\Users\\User\\Desktop\\qmo-sss\\jdbc-config.txt";
+        args[1] = "C:\\Users\\User\\Desktop\\qmo-sss\\peryear.txt";
         try {
             for (int i = 0; i < args.length; i++) {
                 String path = args[i];
 
                 switch (i) {
-                    case 1:
+                    case 0:
                         registerDatabase(path);
                         break;
                     default: {
-
+                        generateReport(path);
                         break;
                     }
 
                 }
             }
         } catch (SQLException ex) {
-            System.out.println("An error was encountered while configuring JDBC: " + ex.getMessage());
+            System.out.printf("$> An error was encountered while configuring JDBC: %s Terminating.\n", ex.getMessage());
         } catch (IOException ex) {
-            System.out.println("The JDBC config file was not found.");
+            System.out.printf("$> The JDBC config file was not found on path %s.\n", args[0]);
         }
 
-        System.out.println("The program has finished executing.");
+        System.out.println("$> The program has finished executing.");
     }
 
+    @SuppressWarnings("unchecked")
     private static void generateReport(String path) {
-        System.out.printf("%s> Reading contents... \n", path);
+        System.out.printf("%s> File has been loaded. \n", path);
         try (Connection con = JdbcHelper.getConnection()) {
             ReportGenerator rep = null;
             try (BufferedReader br = new BufferedReader(new FileReader(path))) {
@@ -79,20 +83,21 @@ public class UniversalGenerator {
                                 } else if (args.length == rep.getParamCount() + 1) {
                                     rep.insertArguments(Arrays.copyOfRange(args, 0, args.length - 1), args[args.length - 1]);
                                 }
-                                System.out.printf("%s> Successfully registered parameters on line %d.\n", path, cnt + 1);
+                                System.out.printf("%s> Successfully registered parameters on line %d.\r", path, cnt + 1);
                                 break;
                             }
 
                         }
                     } catch (ParamLengthMismatchException ex) {
-                        System.out.printf("%s> Skipping line %d. A mismatch between args and params was encountered.\n", path, cnt + 1);
+                        System.out.printf("%s> Skipping line %d. A mismatch between args and params was encountered.\r", path, cnt + 1);
                     }
 
                     cnt++;
                 }
+                
+                System.out.printf("%s> Reached the end of file after line %d \n", path, cnt);
             }
-
-            System.out.printf("%s> Finished reading the file.\n", path);
+            
             System.out.printf("%s> Starting report generation...\n", path);
             for (int i = 0; i < rep.getReportCount(); i++) {
                 System.out.printf("%s> %s | (%d / %d) Generating report to path %s\r", path, progressBar(50, i + 1, rep.getReportCount()), i + 1, rep.getReportCount(), rep.getDestPath(i));
@@ -102,6 +107,7 @@ public class UniversalGenerator {
 
         } catch (JRException ex) {
             System.out.printf("%s> .jrxml compilation has failed. Aborting.\n", path);
+            System.out.println(ex.getMessage());
         } catch (IOException ex) {
             System.out.printf("%s> This file is either missing or invalid. Aborting.\n", path);
         } catch (SQLException ex) {
@@ -115,14 +121,20 @@ public class UniversalGenerator {
 
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String str = null;
-
-            JdbcHelper.config("oracle.jdbc.driver.OracleDriver", br.readLine(), br.readLine(), br.readLine());
-
+            url = br.readLine();
+            user = br.readLine();
+            pass = br.readLine();
+            System.out.println("Starting JDBC connection.");
+            System.out.printf("$> Database URL: %s\n", url);
+            System.out.printf("$> Username: %s\n", user);
+            System.out.printf("$> Password: %s\n", pass.replaceAll(".", "*"));
+            JdbcHelper.config("oracle.jdbc.driver.OracleDriver", url, user, pass);
         } catch (ClassNotFoundException ex) {
             //this will never happen
         }
-
+        
         try (Connection con = JdbcHelper.getConnection()) {
+            System.out.println("JDBC connection established.");
             //just for testing the connectivity
         }
     }
@@ -136,7 +148,8 @@ public class UniversalGenerator {
     }
 
     private static String progressBar(int maxBars, int current, int count) {
-        int barCount = (int) Math.floor(((double) current / count) * maxBars);
+        double mult = ((double) current) / count;
+        int barCount = (int) Math.floor(mult * maxBars);
         StringBuilder str = new StringBuilder("|");
         for (int i = 1; i <= maxBars; i++) {
             if (barCount >= i) {

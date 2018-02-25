@@ -5,6 +5,7 @@
  */
 package jasperreports.models;
 
+import java.io.File;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,6 +63,15 @@ public class ReportGenerator {
     
     public String generateReport(int index) throws JRException {
         JasperPrint jasperPrint = JasperFillManager.fillReport(report, args.get(index), connection);
+        StringBuilder sb = new StringBuilder();
+        String[] split = destPaths.get(index).split("/");
+        for (int i = 0; i < split.length - 1; i++) {
+            sb.append(split[i]);
+            if (i < split.length - 2) {
+                sb.append("/");
+            }
+        }
+        new File(sb.toString()).mkdirs();
         JasperExportManager.exportReportToPdfFile(jasperPrint, destPaths.get(index));
         return destPaths.get(index);
     }
