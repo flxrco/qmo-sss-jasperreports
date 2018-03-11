@@ -116,4 +116,8 @@ public class RenderManager {
         return args.size();
     }
     
+    public boolean isEmpty() {
+        return args.isEmpty();
+    }
+    
 }
