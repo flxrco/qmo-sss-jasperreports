@@ -17,9 +17,9 @@ import net.sf.jasperreports.engine.JRException;
  * The manager class for multi-threaded report generation.
  * @author Felix
  */
-public class ExportManager {
+public class ExportManagerV2 {
 
-    final private RenderManager[] renderers;
+    private RenderManager[] renderers;
     final private Set<Thread> pool;
     
     private boolean finished = false;
@@ -31,7 +31,7 @@ public class ExportManager {
      * @param limit int that represents how many active threads at an time an instance can have
      * @param renderers an array that contains RenderManager objects
      */
-    public ExportManager(int limit, RenderManager... renderers) {
+    public ExportManagerV2(int limit, RenderManager... renderers) {
         pool = new HashSet<>();
         this.renderers = renderers;
         this.limit = limit;
