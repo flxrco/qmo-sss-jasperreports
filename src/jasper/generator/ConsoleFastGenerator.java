@@ -31,6 +31,10 @@ import net.sf.jasperreports.engine.JRException;
  */
 public class ConsoleFastGenerator {
 
+    public static void main(String args[]) {
+        generate(10, args[0], Arrays.copyOfRange(args, 1, args.length));
+    }
+    
     /**
      * Generates the reports in bulk. Has a nifty progress bar to alleviate
      * impatience.
