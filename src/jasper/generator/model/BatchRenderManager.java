@@ -37,10 +37,17 @@ public class BatchRenderManager {
     }
 
     public BatchRenderManager(CompileManager[] compilers) {
-        this(new RenderManager[compilers.length]);
+        renderers = new RenderManager[compilers.length];
         for (int i = 0; i < compilers.length; i++) {
             renderers[i] = compilers[i].getRenderer();
         }
+        finished = new HashSet<>();
+        counter = 0;
+        int tempInitial = 0;
+        for (RenderManager renderer : renderers) {
+            tempInitial += renderer.countInitial();
+        }
+        initial = tempInitial;
     }
 
     public Map<String, Object> render() throws JRException, EmptyRenderQueueException, SQLException {
@@ -50,8 +57,9 @@ public class BatchRenderManager {
         
         RenderManager renderer = renderers[counter];
         try {
+            Map<String, Object> result =  renderer.render(JdbcHelper.getConnection());
             rendered++;
-            return renderer.render(JdbcHelper.getConnection());
+            return result;
         } finally {
             if (renderer.countQueued() == 0) {
                 finished.add(counter);

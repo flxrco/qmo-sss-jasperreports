@@ -32,9 +32,17 @@ import net.sf.jasperreports.engine.JRException;
 public class ConsoleFastGenerator {
 
     public static void main(String args[]) {
-        generate(10, args[0], Arrays.copyOfRange(args, 1, args.length));
+        args = new String[]{
+            "D:\\Users\\User\\Desktop\\QMO-SSS\\config\\jdbc.txt",
+            "D:\\Users\\User\\Desktop\\QMO-SSS\\config\\test.txt"
+        };
+        try {
+            generate(10, args[0], Arrays.copyOfRange(args, 1, args.length));
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
     }
-    
+
     /**
      * Generates the reports in bulk. Has a nifty progress bar to alleviate
      * impatience.
@@ -84,8 +92,7 @@ public class ConsoleFastGenerator {
             }
 
             System.out.printf("$> Successfully compiled %d .jrxml file%s.\n", compiledList.size(), compiledList.size() == 1 ? "" : "s");
-            
-            
+
             //begin report generation phase
             final BatchRenderManager batch = new BatchRenderManager(compiledList.toArray(new CompileManager[compiledList.size()]));
             System.out.printf("$> %d report%s have been added to the render queue.\n", batch.countQueued(), batch.countQueued() == 1 ? "" : "s");
@@ -99,7 +106,6 @@ public class ConsoleFastGenerator {
                             counter++;
                             System.out.printf("%s\r", progressBar(counter, batch.countRendered(), batch.countInitial()));
                             Thread.sleep(250);
-
                         }
                     } catch (InterruptedException ex) {
                         System.out.printf("%s\r", progressBar(-1, batch.countInitial(), batch.countInitial()));
@@ -108,7 +114,7 @@ public class ConsoleFastGenerator {
                     }
                 }
             };
-
+            
             bar.start(); //start the anonmyouse class/thread
 
             ExecutorService renderPool = Executors.newFixedThreadPool(threadLimit); //thread pool for the generation of the report .pdfs
@@ -119,7 +125,7 @@ public class ConsoleFastGenerator {
                             try {
                                 batch.render();
                             } catch (JRException | SQLException ex) {
-
+                                System.out.println(ex.getMessage());
                             }
                         }
                     } catch (EmptyRenderQueueException ex) {
@@ -154,7 +160,7 @@ public class ConsoleFastGenerator {
             JdbcHelper.getConnection().close(); //test if connection is valid
 
             System.out.println("$> JDBC configuration successful");
-            System.out.printf("$> URL: %d\n", url);
+            System.out.printf("$> URL: %s\n", url);
             System.out.printf("$> Username: %s | Password: %s\n", user, pass);
         }
     }
@@ -166,17 +172,14 @@ public class ConsoleFastGenerator {
             String[] params = br.readLine().split(",");
 
             CompileManager compiled = new CompileManager(JdbcHelper.getConnection(), reportPath, subreportPath, params);
-
             String str;
-
-            while ((str = br.readLine()) == null) {
+            while ((str = br.readLine()) != null) {
                 try {
                     String[] temp = str.split(",");
-                    compiled.insertArguments(Arrays.copyOfRange(temp, 0, params.length), reportPath);
+                    compiled.insertArguments(Arrays.copyOfRange(temp, 0, params.length), temp[temp.length - 1]);
                 } catch (ParameterLengthMismatchException ex) {
                 }
             }
-            
             return compiled;
         }
     }
