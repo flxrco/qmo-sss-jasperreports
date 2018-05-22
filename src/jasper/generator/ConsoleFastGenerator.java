@@ -32,10 +32,12 @@ import net.sf.jasperreports.engine.JRException;
 public class ConsoleFastGenerator {
 
     public static void main(String args[]) {
-        args = new String[]{
-            "D:\\Users\\User\\Desktop\\QMO-SSS\\config\\jdbc.txt",
-            "D:\\Users\\User\\Desktop\\QMO-SSS\\config\\test.txt"
-        };
+        System.out.printf("$> JDBC config file: %s\n", args[0]);
+        
+        System.out.println("$> JasperReports config file:");
+        for (int i = 1; i < args.length; i++) {
+            System.out.printf("$> File %d = %s\n", i, args[i]);
+        }
         try {
             generate(10, args[0], Arrays.copyOfRange(args, 1, args.length));
         } catch (Exception ex) {
@@ -68,7 +70,7 @@ public class ConsoleFastGenerator {
                     try {
                         return jrxmlCompiler(str);
                     } catch (IOException | SQLException | JRException ex) {
-                        System.out.printf("%s> .jrxml compilation failed.\n", str);
+                        System.out.printf("%s> .jrxml compilation failed: %s\n", str, ex.getMessage());
                         return null; //if compilation failed, just return null
                     }
                 };
@@ -138,7 +140,7 @@ public class ConsoleFastGenerator {
             try {
                 renderPool.awaitTermination(1, TimeUnit.DAYS);
                 bar.interrupt();
-                System.out.println("$> Report generation completed.");
+                System.out.println("$> Report generation completed.\n");
             } catch (InterruptedException ex) {
 
             }
@@ -146,7 +148,7 @@ public class ConsoleFastGenerator {
         } catch (IOException ex) {
             System.out.printf("$> An IOException was encountered: %s\n", ex.getMessage());
         } catch (SQLException ex) {
-            System.out.printf("$> An exception was encountered while setting up the JDBC: %s", ex.getMessage());
+            System.out.printf("$> An exception was encountered while setting up the JDBC: %s\n", ex.getMessage());
         } finally {
             System.out.println("$> Terminating.");
         }
@@ -166,6 +168,7 @@ public class ConsoleFastGenerator {
     }
 
     private static CompileManager jrxmlCompiler(String jrxmlConfigPath) throws IOException, SQLException, JRException {
+        System.out.println("$> .jrxml compilation process start");
         try (BufferedReader br = new BufferedReader(new FileReader(jrxmlConfigPath))) {
             String reportPath = br.readLine(), subreportPath = br.readLine();
             List<String> list = new ArrayList<>();
@@ -189,7 +192,7 @@ public class ConsoleFastGenerator {
         int prog = (int) Math.floor((double) progress / total * 50);
         for (int i = 1; i <= 50; i++) {
             if (prog >= i) {
-                str.append("¦");
+                str.append("|");
             } else {
                 str.append("-");
             }
@@ -198,6 +201,8 @@ public class ConsoleFastGenerator {
 
         if (counter == -1) {
             spinner = ' ';
+        } else if (counter % 5 == 0) {
+            spinner = '\\';
         } else if (counter % 4 == 0) {
             spinner = '|';
         } else if (counter % 3 == 0) {
