@@ -7,7 +7,7 @@ package jasper.generator.threaded;
 
 import jasper.generator.model.RenderManager;
 import jasper.generator.model.exceptions.EmptyRenderQueueException;
-import jasperreports.models.JdbcHelper;
+import jasper.jdbc.JdbcHelper;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;

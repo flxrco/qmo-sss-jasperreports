@@ -9,7 +9,7 @@ import jasper.generator.model.BatchRenderManager;
 import jasper.generator.model.CompileManager;
 import jasper.generator.model.exceptions.EmptyRenderQueueException;
 import jasper.generator.model.exceptions.ParameterLengthMismatchException;
-import jasperreports.models.JdbcHelper;
+import jasper.jdbc.JdbcHelper;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
