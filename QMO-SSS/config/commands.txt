@@ -1,0 +1,1 @@
+java -jar "D:\Users\User\Documents\NetBeansProjects\JasperReports\dist\JasperReports.jar" "D:\Users\User\Desktop\QMO-SSS\config\jdbc.txt" "D:\Users\User\Desktop\QMO-SSS\config\test.txt"

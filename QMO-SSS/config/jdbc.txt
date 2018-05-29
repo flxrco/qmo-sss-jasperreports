@@ -1,0 +1,3 @@
+jdbc:oracle:thin:@172.20.0.201:1521:USTPRD1
+opqm_user03
+password

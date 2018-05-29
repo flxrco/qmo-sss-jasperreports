@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PartIPerqCollege_subreport_gender" language="groovy" pageWidth="802" pageHeight="555" orientation="Landscape" columnWidth="802" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.7715610000000022"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<parameter name="p_school_year" class="java.lang.String"/>
+	<parameter name="p_semester" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="p_college_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="p_course_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="p_year_level" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT  T1.COLLEGE_ID,
+        T1.COURSE_ID,
+        T1.SUBJ_YR_LEVEL,
+        T1.ANSWER_CHOICES CHOICE,
+        T1.COLLEGE_NAME,
+        '  ' || T3.ABBREVIATION NAME,
+        T1.SCHOOL_YEAR,
+        T1.SEMESTER,
+        T1.TOTAL TOTS
+FROM    ICS_PIPERSONALDETAILSYRLVL T1,
+        QMO_COLLEGE T2,
+        QMO_COURSE T3
+WHERE   T1.COLLEGE_ID  = T2.COLLEGE_ID
+AND     T2.COLLEGE_ID  = T3.COLLEGE_ID
+AND     T1.COURSE_ID   = T3.COURSE_ID
+AND     T1.PART_NAME  LIKE '%Secondary'
+AND     T1.SCHOOL_YEAR  = $P{p_school_year}
+AND     T1.SEMESTER     = $P{p_semester}
+AND     T1.COLLEGE_ID   = $P{p_college_id}
+AND     T1.COURSE_ID    = $P{p_course_id}
+AND     T1.SUBJ_YR_LEVEL = $P{p_year_level}
+UNION ALL
+SELECT
+DISTINCT  T1.COLLEGE_ID,
+        T1.COURSE_ID,
+        T1.SUBJ_YR_LEVEL,
+        T1.ANSWER_CHOICES CHOICE,
+        T1.COLLEGE_NAME,
+        ' ' || T2.NAME NAME,
+        T1.SCHOOL_YEAR,
+        T1.SEMESTER,
+        T1.TOTAL TOTS
+FROM    ICS_PIPERSONALDETAILSYRLVL T1,
+        QMO_COLLEGE T2,
+        QMO_COURSE T3
+WHERE   T1.COLLEGE_ID  = T2.COLLEGE_ID
+AND     T2.COLLEGE_ID  = T3.COLLEGE_ID
+AND     T1.PART_NAME  LIKE '%Secondary'
+AND     T1.SCHOOL_YEAR  = $P{p_school_year}
+AND     T1.SEMESTER     = $P{p_semester}
+AND     T1.COLLEGE_ID   = $P{p_college_id}
+AND     T1.COURSE_ID    = 999
+AND     T1.SUBJ_YR_LEVEL = 999
+UNION ALL
+SELECT  COLLEGE_ID,
+        COURSE_ID,
+        SUBJ_YR_LEVEL,
+        ANSWER_CHOICES CHOICE,
+        COLLEGE_NAME,
+        COURSE_NAME NAME,
+        SCHOOL_YEAR,
+        SEMESTER,
+        TOTAL TOTS
+FROM    ICS_PIPERSONALDETAILSYRLVL
+WHERE   PART_NAME  LIKE '%Secondary'
+AND     SCHOOL_YEAR  = $P{p_school_year}
+AND     SEMESTER     = $P{p_semester}
+AND     COLLEGE_ID   = 99
+AND     COURSE_ID    = 99
+AND     SUBJ_YR_LEVEL = 99
+ORDER BY NAME, CHOICE]]>
+	</queryString>
+	<field name="COLLEGE_ID" class="java.math.BigDecimal"/>
+	<field name="CHOICE" class="java.lang.String"/>
+	<field name="COLLEGE_NAME" class="java.lang.String"/>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="SCHOOL_YEAR" class="java.sql.Timestamp"/>
+	<field name="SEMESTER" class="java.math.BigDecimal"/>
+	<field name="TOTS" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<summary>
+		<band height="430" splitType="Stretch">
+			<textField>
+				<reportElement x="123" y="11" width="137" height="11"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Actual Number    " +"AY " + new Integer(new Date($P{p_school_year}).getYear()+1900) + "-" + new Integer(new Date($P{p_school_year}).getYear()-99)]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="115" y="-1" width="137" height="12"/>
+				<textElement textAlignment="Center">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Secondary School Type]]></text>
+			</staticText>
+			<crosstab>
+				<reportElement x="0" y="22" width="338" height="93"/>
+				<crosstabHeaderCell>
+					<cellContents>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="0" y="2" width="119" height="13"/>
+							<textElement/>
+							<text><![CDATA[INDICATORS]]></text>
+						</staticText>
+					</cellContents>
+				</crosstabHeaderCell>
+				<rowGroup name="CHOICE" width="120" totalPosition="End">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{CHOICE}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField>
+								<reportElement style="Crosstab Data Text" x="10" y="2" width="109" height="13"/>
+								<textElement textAlignment="Left"/>
+								<textFieldExpression class="java.lang.String"><![CDATA[$V{CHOICE}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents backcolor="#BFE1FF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<staticText>
+								<reportElement x="10" y="2" width="109" height="13"/>
+								<textElement verticalAlignment="Middle"/>
+								<text><![CDATA[TOTAL]]></text>
+							</staticText>
+						</cellContents>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="NAME" height="16">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{NAME}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField>
+								<reportElement style="Crosstab Data Text" x="0" y="2" width="72" height="13"/>
+								<textElement/>
+								<textFieldExpression class="java.lang.String"><![CDATA[$V{NAME}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="TOTSMeasure" class="java.math.BigDecimal" calculation="Sum">
+					<measureExpression><![CDATA[$F{TOTS}]]></measureExpression>
+				</measure>
+				<crosstabCell width="72" height="18">
+					<cellContents>
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+						<textField pattern="#,##0">
+							<reportElement style="Crosstab Data Text" x="0" y="2" width="66" height="13"/>
+							<textElement textAlignment="Right"/>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{TOTSMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="72" height="17" rowTotalGroup="CHOICE">
+					<cellContents backcolor="#BFE1FF" mode="Opaque">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+						<textField pattern="#,##0">
+							<reportElement style="Crosstab Data Text" x="0" y="2" width="66" height="13"/>
+							<textElement textAlignment="Right"/>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{TOTSMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="50" columnTotalGroup="NAME">
+					<cellContents backcolor="#BFE1FF" mode="Opaque">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+						<textField>
+							<reportElement style="Crosstab Data Text" x="0" y="0" width="50" height="25"/>
+							<textElement/>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{TOTSMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell rowTotalGroup="CHOICE" columnTotalGroup="NAME">
+					<cellContents backcolor="#BFE1FF" mode="Opaque">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+						<textField>
+							<reportElement style="Crosstab Data Text" x="0" y="0" width="50" height="25"/>
+							<textElement/>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{TOTSMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+			</crosstab>
+			<barChart>
+				<chart isShowLegend="true">
+					<reportElement x="0" y="115" width="338" height="299"/>
+					<chartTitle/>
+					<chartSubtitle/>
+					<chartLegend position="Right"/>
+				</chart>
+				<categoryDataset>
+					<categorySeries>
+						<seriesExpression><![CDATA[$F{CHOICE}]]></seriesExpression>
+						<categoryExpression><![CDATA[$F{NAME}]]></categoryExpression>
+						<valueExpression><![CDATA[$F{TOTS}]]></valueExpression>
+					</categorySeries>
+				</categoryDataset>
+				<barPlot isShowLabels="true" isShowTickLabels="true" isShowTickMarks="true">
+					<plot/>
+					<itemLabel color="#000000" backgroundColor="#FFFFFF"/>
+					<categoryAxisFormat>
+						<axisFormat verticalTickLabels="true">
+							<labelFont/>
+							<tickLabelFont/>
+						</axisFormat>
+					</categoryAxisFormat>
+					<valueAxisFormat>
+						<axisFormat verticalTickLabels="false">
+							<labelFont/>
+							<tickLabelFont/>
+						</axisFormat>
+					</valueAxisFormat>
+				</barPlot>
+			</barChart>
+		</band>
+	</summary>
+</jasperReport>

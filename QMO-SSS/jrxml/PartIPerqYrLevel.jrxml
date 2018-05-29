@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PartIPerqYrLevel" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="0.9075000000000015"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="2519"/>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="p_school_year" class="java.lang.String"/>
+	<parameter name="p_semester" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="p_college_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="p_course_id" class="java.lang.String"/>
+	<parameter name="p_year_level" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT  col.description COLLEGE,
+        cor.course_degree COURSE
+FROM    QMO_COLLEGE col,
+        QMO_COURSE cor
+WHERE   col.college_id = cor.college_id
+AND     col.college_id = $P{p_college_id}
+AND     cor.course_id = $P{p_course_id}]]>
+	</queryString>
+	<field name="COLLEGE" class="java.lang.String"/>
+	<field name="COURSE" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="66" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="195" height="12"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Quality Management Office]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="12" width="195" height="12"/>
+				<textElement>
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[University of Santo Tomas]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="23" width="225" height="13"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[STUDENT SATISFACTION SURVEY Part 1 - Personal Details ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="702" y="12" width="100" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[SSS Part 1]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="34" width="802" height="16"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PART I PERSONAL DETAILS]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="225" y="24" width="127" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["AY " + new Integer(new Date($P{p_school_year}).getYear()+1900) + "-" + new Integer(new Date($P{p_school_year}).getYear()-99)]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="49" width="802" height="16"/>
+				<textElement textAlignment="Center">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{COLLEGE} + ": " + $F{COURSE} + " " + ($P{p_year_level} == "1"? "(1st Year)":
+$P{p_year_level} == "2"? "(2nd Year)":
+$P{p_year_level} == "3"? "(3rd Year)":
+$P{p_year_level} == "4"? "(4th Year)":
+$P{p_year_level} == "5"? "(5th Year)":
+$P{p_year_level} == "7"? "(Grade 7)":
+$P{p_year_level} == "8"? "(Grade 8)":
+$P{p_year_level} == "9"? "(Grade 9)": null)]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="291" y="1" width="511" height="11"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{COLLEGE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<detail>
+		<band height="387">
+			<break>
+				<reportElement x="0" y="386" width="802" height="1"/>
+			</break>
+			<subreport>
+				<reportElement x="0" y="0" width="381" height="361"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_course_id">
+					<subreportParameterExpression><![CDATA[$P{p_course_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_school_year">
+					<subreportParameterExpression><![CDATA[$P{p_school_year}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_year_level">
+					<subreportParameterExpression><![CDATA[$P{p_year_level}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_semester">
+					<subreportParameterExpression><![CDATA[$P{p_semester}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_college_id">
+					<subreportParameterExpression><![CDATA[$P{p_college_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "PartIPerqYrLevel_gender.jasper"]]></subreportExpression>
+			</subreport>
+			<subreport>
+				<reportElement x="419" y="0" width="381" height="359"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_course_id">
+					<subreportParameterExpression><![CDATA[$P{p_course_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_school_year">
+					<subreportParameterExpression><![CDATA[$P{p_school_year}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_year_level">
+					<subreportParameterExpression><![CDATA[$P{p_year_level}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_semester">
+					<subreportParameterExpression><![CDATA[$P{p_semester}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_college_id">
+					<subreportParameterExpression><![CDATA[$P{p_college_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "PartIPerqYrLevel_LivingArrangement.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="464">
+			<break>
+				<reportElement x="0" y="463" width="802" height="1"/>
+			</break>
+			<subreport>
+				<reportElement x="0" y="68" width="381" height="361"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_course_id">
+					<subreportParameterExpression><![CDATA[$P{p_course_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_school_year">
+					<subreportParameterExpression><![CDATA[$P{p_school_year}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_year_level">
+					<subreportParameterExpression><![CDATA[$P{p_year_level}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_semester">
+					<subreportParameterExpression><![CDATA[$P{p_semester}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_college_id">
+					<subreportParameterExpression><![CDATA[$P{p_college_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "PartIPerqYrLevel_BSRSU.jasper"]]></subreportExpression>
+			</subreport>
+			<subreport>
+				<reportElement x="421" y="68" width="381" height="361"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_course_id">
+					<subreportParameterExpression><![CDATA[$P{p_course_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_school_year">
+					<subreportParameterExpression><![CDATA[$P{p_school_year}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_year_level">
+					<subreportParameterExpression><![CDATA[$P{p_year_level}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_semester">
+					<subreportParameterExpression><![CDATA[$P{p_semester}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_college_id">
+					<subreportParameterExpression><![CDATA[$P{p_college_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "PartIPerqYrLevel_BSRGU.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="465">
+			<subreport>
+				<reportElement x="0" y="68" width="381" height="361"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_course_id">
+					<subreportParameterExpression><![CDATA[$P{p_course_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_school_year">
+					<subreportParameterExpression><![CDATA[$P{p_school_year}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_year_level">
+					<subreportParameterExpression><![CDATA[$P{p_year_level}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_semester">
+					<subreportParameterExpression><![CDATA[$P{p_semester}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_college_id">
+					<subreportParameterExpression><![CDATA[$P{p_college_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "PartIPerqYrLevel_MOT.jasper"]]></subreportExpression>
+			</subreport>
+			<subreport>
+				<reportElement x="421" y="68" width="381" height="361"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_course_id">
+					<subreportParameterExpression><![CDATA[$P{p_course_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_school_year">
+					<subreportParameterExpression><![CDATA[$P{p_school_year}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_year_level">
+					<subreportParameterExpression><![CDATA[$P{p_year_level}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_semester">
+					<subreportParameterExpression><![CDATA[$P{p_semester}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_college_id">
+					<subreportParameterExpression><![CDATA[$P{p_college_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "PartIPerqYrLevel_AS.jasper"]]></subreportExpression>
+			</subreport>
+			<break>
+				<reportElement x="0" y="464" width="802" height="1"/>
+			</break>
+		</band>
+		<band height="465">
+			<subreport>
+				<reportElement x="0" y="68" width="381" height="361"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_course_id">
+					<subreportParameterExpression><![CDATA[$P{p_course_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_school_year">
+					<subreportParameterExpression><![CDATA[$P{p_school_year}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_year_level">
+					<subreportParameterExpression><![CDATA[$P{p_year_level}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_semester">
+					<subreportParameterExpression><![CDATA[$P{p_semester}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_college_id">
+					<subreportParameterExpression><![CDATA[$P{p_college_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "PartIPerqYrLevel_Citi.jasper"]]></subreportExpression>
+			</subreport>
+			<subreport>
+				<reportElement x="421" y="68" width="381" height="361"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_course_id">
+					<subreportParameterExpression><![CDATA[$P{p_course_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_school_year">
+					<subreportParameterExpression><![CDATA[$P{p_school_year}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_year_level">
+					<subreportParameterExpression><![CDATA[$P{p_year_level}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_semester">
+					<subreportParameterExpression><![CDATA[$P{p_semester}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_college_id">
+					<subreportParameterExpression><![CDATA[$P{p_college_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "PartIPerqYrLevel_Reli.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="465">
+			<subreport>
+				<reportElement x="0" y="68" width="381" height="361"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_course_id">
+					<subreportParameterExpression><![CDATA[$P{p_course_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_school_year">
+					<subreportParameterExpression><![CDATA[$P{p_school_year}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_year_level">
+					<subreportParameterExpression><![CDATA[$P{p_year_level}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_semester">
+					<subreportParameterExpression><![CDATA[$P{p_semester}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_college_id">
+					<subreportParameterExpression><![CDATA[$P{p_college_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "PartIPerqYrLevel_Secon.jasper"]]></subreportExpression>
+			</subreport>
+			<subreport>
+				<reportElement x="421" y="68" width="381" height="361"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_course_id">
+					<subreportParameterExpression><![CDATA[$P{p_course_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_school_year">
+					<subreportParameterExpression><![CDATA[$P{p_school_year}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_year_level">
+					<subreportParameterExpression><![CDATA[$P{p_year_level}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_semester">
+					<subreportParameterExpression><![CDATA[$P{p_semester}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_college_id">
+					<subreportParameterExpression><![CDATA[$P{p_college_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "PartIPerqYrLevel_Working.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="465">
+			<subreport>
+				<reportElement x="0" y="68" width="381" height="361"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_course_id">
+					<subreportParameterExpression><![CDATA[$P{p_course_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_school_year">
+					<subreportParameterExpression><![CDATA[$P{p_school_year}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_year_level">
+					<subreportParameterExpression><![CDATA[$P{p_year_level}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_semester">
+					<subreportParameterExpression><![CDATA[$P{p_semester}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_college_id">
+					<subreportParameterExpression><![CDATA[$P{p_college_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "PartIPerqYrLevel_Reg.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="465">
+			<subreport>
+				<reportElement x="0" y="68" width="381" height="361"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_course_id">
+					<subreportParameterExpression><![CDATA[$P{p_course_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_school_year">
+					<subreportParameterExpression><![CDATA[$P{p_school_year}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_year_level">
+					<subreportParameterExpression><![CDATA[$P{p_year_level}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_semester">
+					<subreportParameterExpression><![CDATA[$P{p_semester}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_college_id">
+					<subreportParameterExpression><![CDATA[$P{p_college_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "PartIPerqYrLevel_Size.jasper"]]></subreportExpression>
+			</subreport>
+			<subreport>
+				<reportElement x="421" y="68" width="381" height="361"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_course_id">
+					<subreportParameterExpression><![CDATA[$P{p_course_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_school_year">
+					<subreportParameterExpression><![CDATA[$P{p_school_year}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_year_level">
+					<subreportParameterExpression><![CDATA[$P{p_year_level}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_semester">
+					<subreportParameterExpression><![CDATA[$P{p_semester}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="p_college_id">
+					<subreportParameterExpression><![CDATA[$P{p_college_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "PartIPerqYrLevel_Income.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+</jasperReport>
